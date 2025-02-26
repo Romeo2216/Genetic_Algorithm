@@ -1,7 +1,4 @@
-
-
-
-
+import random
 
 def choose_word(word=""):
     if word == "":
@@ -9,7 +6,9 @@ def choose_word(word=""):
     return list(word)
 
 def default_word(word):
-    return list("*" * len(word))
+    letter_list = possible_letters()
+    return [random.choice(letter_list) for _ in range(len(word))]
+   
 
 def guest_similarity(word, guess):
     score = 0
