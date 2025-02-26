@@ -8,6 +8,10 @@ Template file for your Exercise 3 submission
 (generic genetic algorithm module)
 """
 
+import random
+import itertools
+from tqdm import tqdm
+import numpy as np
 
 class Individual:
     """Represents an Individual for a genetic algorithm"""
@@ -35,11 +39,24 @@ class Individual:
 
 class GAProblem:
     """Defines a Genetic algorithm problem to be solved by ga_solver"""
-    pass  # REPLACE WITH YOUR CODE
+    def __init__(self):
+        """Initializes a GAProblem instance"""
+        
+    def evaluate_individual(self, individual: Individual):
+        """Evaluates an individual's fitness"""
+        
+    def generate_individual(self):
+        """Generates a random individual"""
+
+    def get_possible_genes(self):
+        """Returns the possible genes for this problem"""
+
+    def get_gene_repeats(self):
+        """Returns the gene_repeats attribute"""
 
 
 class GASolver:
-    def __init__(self, problem: GAProblem, selection_rate=0.5, mutation_rate=0.1):
+    def __init__(self, problem: GAProblem, selection_rate=0.5, mutation_rate=0.1, pop_size=50):
         """Initializes an instance of a ga_solver for a given GAProblem
 
         Args:
@@ -48,13 +65,23 @@ class GASolver:
             mutation_rate (float, optional): mutation_rate between 0 and 1.0. Defaults to 0.1.
         """
         self._problem = problem
+        self._pop_size = pop_size
         self._selection_rate = selection_rate
         self._mutation_rate = mutation_rate
         self._population = []
 
-    def reset_population(self, pop_size=50):
+    def reset_population(self):
         """ Initialize the population with pop_size random Individuals """
-        pass  # REPLACE WITH YOUR CODE
+
+        for i in range(self._pop_size):
+
+            chromosomes = self._problem.generate_individual()
+            
+            fitness = self._problem.evaluate_individual(chromosomes)
+
+            new_individual = Individual(chromosomes, fitness)
+    
+            self._population.append(new_individual)
 
     def evolve_for_one_generation(self):
         """ Apply the process for one generation : 
@@ -66,6 +93,56 @@ class GASolver:
                 mutation_rate i.e., mutate it if a random value is below   
                 mutation_rate
         """
+
+        self._population.sort(key=lambda x: x.fitness, reverse=True)
+
+        # Selection
+        self._population = self._population[:int(len(self._population)*self._selection_rate)]
+        
+        nombres = range(0, len(self._population) - 1)  # Génère les nombres de 1 à 5
+
+        combinaisons = list(itertools.combinations(nombres, 2))
+
+        while len(self._population) < self._pop_size:
+        
+            # Reproduction
+            index = random.choice(combinaisons)
+
+            combinaisons.remove(index)
+            
+            parent1 = self._population[index[0]]
+            parent2 = self._population[index[1]]
+
+            x_point = random.randint(0, len(parent1.chromosome) - 1)
+
+            if self._problem.get_gene_repeats():
+                new_chrom = parent1.chromosome[0:x_point] + parent2.chromosome[x_point:]
+            else:
+                segment1 = parent1.chromosome[:x_point]
+                segment2 = [gene for gene in parent2.chromosome if gene not in segment1]
+
+                new_chrom = segment1 + segment2
+
+            number = random.random()
+
+            # Mutation
+            if number < self._mutation_rate:
+
+                if self._problem.get_gene_repeats():
+                    valid_genes = self._problem.get_possible_genes()
+                    new_gene = random.choice(valid_genes)
+                    index = random.randint(0, len(new_chrom) - 1)
+                    new_chrom[index] = new_gene  
+                else:
+                    index1 , index2 = np.random.randint(0, len(new_chrom), 2)
+                    new_chrom[index1], new_chrom[index2] = new_chrom[index2], new_chrom[index1]
+
+            new_fitness = self._problem.evaluate_individual(new_chrom)
+
+            new_individual = Individual(new_chrom, new_fitness)
+
+            self._population.append(new_individual)
+
         pass  # REPLACE WITH YOUR CODE
 
     def show_generation_summary(self):
@@ -74,7 +151,9 @@ class GASolver:
 
     def get_best_individual(self):
         """ Return the best Individual of the population """
-        pass  # REPLACE WITH YOUR CODE
+        self._population.sort(key=lambda x: x.fitness, reverse=True)
+
+        return self._population[0]
 
     def evolve_until(self, max_nb_of_generations=500, threshold_fitness=None):
         """ Launch the evolve_for_one_generation function until one of the two condition is achieved : 
@@ -82,4 +161,10 @@ class GASolver:
             - The fitness of the best Individual is greater than or equal to
               threshold_fitness
         """
-        pass  # REPLACE WITH YOUR CODE
+        pbar = tqdm(total=max_nb_of_generations)
+        while max_nb_of_generations > 0 and self.get_best_individual().fitness < threshold_fitness:
+
+            self.evolve_for_one_generation()
+
+            pbar.update(1)
+            max_nb_of_generations += -1
