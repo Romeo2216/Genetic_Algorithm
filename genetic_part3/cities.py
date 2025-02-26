@@ -68,7 +68,7 @@ def road_length(cities:Dict[str, Coordinates], road:Iterable[str]) -> float:
 
 
 if __name__ == '__main__':
-    city_dict = load_cities("cities.txt")
+    city_dict = load_cities("genetic_part3\cities.txt")
     print(city_dict)
     road = default_road(city_dict)
     shuffle(road)

@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     from ga_solver import GASolver
 
-    match = mm.MastermindMatch(secret_size=6)
+    match = mm.MastermindMatch(secret_size=12)
     problem = MastermindProblem(match, gene_repeats=True)
     solver = GASolver(problem)
 

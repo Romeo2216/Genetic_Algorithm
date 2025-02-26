@@ -39,8 +39,6 @@ class Individual:
 
 class GAProblem:
     """Defines a Genetic algorithm problem to be solved by ga_solver"""
-    def __init__(self):
-        """Initializes a GAProblem instance"""
         
     def evaluate_individual(self, individual: Individual):
         """Evaluates an individual's fitness"""
@@ -123,10 +121,10 @@ class GASolver:
 
                 new_chrom = segment1 + segment2
 
-            number = random.random()
+            mutation = random.random()
 
             # Mutation
-            if number < self._mutation_rate:
+            if mutation < self._mutation_rate:
 
                 if self._problem.get_gene_repeats():
                     valid_genes = self._problem.get_possible_genes()
