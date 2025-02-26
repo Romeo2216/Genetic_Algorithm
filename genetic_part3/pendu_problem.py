@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     from ga_solver import GASolver
 
-    answer = pendu.choose_word("vadogfeyhevjesckoid")
+    answer = pendu.choose_word("pouvoir")
     problem = PProblem(pendu, gene_repeats=True)
     solver = GASolver(problem)
     solver.reset_population()

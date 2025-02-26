@@ -45,6 +45,6 @@ if __name__ == '__main__':
     problem = TSProblem(cities, gene_repeats=False)
     solver = GASolver(problem)
     solver.reset_population()
-    solver.evolve_until(threshold_fitness=10000)
+    solver.evolve_until(threshold_fitness=0, max_nb_of_generations=1000)
     best = solver.get_best_individual()
     cities.draw_cities(city_dict, best.chromosome)
