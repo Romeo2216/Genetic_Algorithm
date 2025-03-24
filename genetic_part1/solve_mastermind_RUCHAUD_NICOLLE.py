@@ -73,43 +73,42 @@ class GASolver:
                 mutation_rate i.e., mutate it if a random value is below   
                 mutation_rate
         """
-
-        # Sort the population
+        # Sort the population by fitness in descending order
         self._population.sort(key=lambda x: x.fitness, reverse=True)
 
-        # Selection
-        self._population = self._population[:int(len(self._population)*self._selection_rate)]
+        # Selection: Keep only the top individuals based on the selection rate
+        self._population = self._population[:int(len(self._population) * self._selection_rate)]
         
-        nombres = range(0, len(self._population) - 1)  # Génère les nombres de 1 à 5
-
+        # Generate all possible pairs of indices for reproduction
+        nombres = range(0, len(self._population) - 1)
         combinaisons = list(itertools.combinations(nombres, 2))
 
+        # Reproduce until the population size is restored
         while len(self._population) < self._pop_size:
         
-            # Reproduction
+            # Select a random pair of parents from the combinations
             index = random.choice(combinaisons)
-
             combinaisons.remove(index)
             
             parent1 = self._population[index[0]]
             parent2 = self._population[index[1]]
 
+            # Perform single-point crossover to create a new chromosome
             x_point = random.randint(0, len(parent1.chromosome) - 1)
-
             new_chrom = parent1.chromosome[0:x_point] + parent2.chromosome[x_point:]
 
+            # Mutation: With a probability defined by mutation_rate, mutate the chromosome
             number = random.random()
-
-            # Mutation
             if number < self._mutation_rate:
+                valid_colors = mm.get_possible_colors()  # Get valid colors for mutation
+                new_gene = random.choice(valid_colors)  # Choose a random new gene
+                index = random.randint(0, len(new_chrom) - 1)  # Choose a random position
+                new_chrom[index] = new_gene  # Replace the gene at the chosen position        
 
-                valid_colors = mm.get_possible_colors()
-                new_gene = random.choice(valid_colors)
-                index = random.randint(0, len(new_chrom) - 1)
-                new_chrom[index] = new_gene        
-
+            # Create a new individual with the mutated chromosome and evaluate its fitness
             new_individual = Individual(new_chrom, MATCH.rate_guess(new_chrom))
 
+            # Add the new individual to the population
             self._population.append(new_individual)
 
 

@@ -73,12 +73,16 @@ class GASolver:
 
         for i in range(self._pop_size):
 
+            # Generate a random individual using the problem's method
             chromosomes = self._problem.generate_individual()
             
+            # Evaluate the fitness of the generated individual
             fitness = self._problem.evaluate_individual(chromosomes)
 
+            # Create a new Individual object with the generated chromosome and fitness
             new_individual = Individual(chromosomes, fitness)
     
+            # Add the new individual to the population
             self._population.append(new_individual)
 
     def evolve_for_one_generation(self):
@@ -92,53 +96,57 @@ class GASolver:
                 mutation_rate
         """
 
+        # Sort the population in descending order based on fitness
         self._population.sort(key=lambda x: x.fitness, reverse=True)
 
-        # Selection
-        self._population = self._population[:int(len(self._population)*self._selection_rate)]
+        # Selection: Keep only the top individuals based on the selection rate
+        self._population = self._population[:int(len(self._population) * self._selection_rate)]
         
-        nombres = range(0, len(self._population) - 1)  # Génère les nombres de 1 à 5
-
+        # Generate all possible combinations of parent indices for reproduction
+        nombres = range(0, len(self._population) - 1)
         combinaisons = list(itertools.combinations(nombres, 2))
 
+        # Reproduce until the population size is restored
         while len(self._population) < self._pop_size:
         
-            # Reproduction
+            # Randomly select a pair of parents from the combinations
             index = random.choice(combinaisons)
-
             combinaisons.remove(index)
             
             parent1 = self._population[index[0]]
             parent2 = self._population[index[1]]
 
+            # Perform crossover at a random point
             x_point = random.randint(0, len(parent1.chromosome) - 1)
 
             if self._problem.get_gene_repeats():
+            # If genes can repeat, simply combine segments from both parents
                 new_chrom = parent1.chromosome[0:x_point] + parent2.chromosome[x_point:]
             else:
+            # If genes cannot repeat, ensure unique genes in the offspring
                 segment1 = parent1.chromosome[:x_point]
                 segment2 = [gene for gene in parent2.chromosome if gene not in segment1]
-
                 new_chrom = segment1 + segment2
 
+            # Mutation: Apply mutation with a probability equal to mutation_rate
             mutation = random.random()
-
-            # Mutation
             if mutation < self._mutation_rate:
-
                 if self._problem.get_gene_repeats():
+                    # For problems allowing gene repeats, replace a random gene
                     valid_genes = self._problem.get_possible_genes()
                     new_gene = random.choice(valid_genes)
                     index = random.randint(0, len(new_chrom) - 1)
                     new_chrom[index] = new_gene  
                 else:
-                    index1 , index2 = np.random.randint(0, len(new_chrom), 2)
+                    # For problems without gene repeats, swap two random genes
+                    index1, index2 = np.random.randint(0, len(new_chrom), 2)
                     new_chrom[index1], new_chrom[index2] = new_chrom[index2], new_chrom[index1]
 
+            # Evaluate the fitness of the new individual
             new_fitness = self._problem.evaluate_individual(new_chrom)
 
+            # Create a new individual and add it to the population
             new_individual = Individual(new_chrom, new_fitness)
-
             self._population.append(new_individual)
 
         pass  # REPLACE WITH YOUR CODE

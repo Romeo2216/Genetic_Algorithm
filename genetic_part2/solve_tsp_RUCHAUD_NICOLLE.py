@@ -52,16 +52,21 @@ class GASolver:
     def reset_population(self):
         """ Initialize the population with pop_size random Individuals """
 
+        # Initialize the population with random individuals
         for i in range(self._pop_size):
-
+            # Generate a default road (sequence of cities)
             chromosome = cities.default_road(city_dict)
 
+            # Shuffle the chromosome to create a random individual
             random.shuffle(chromosome)
 
+            # Calculate the fitness of the individual (negative road length)
             fitness = - cities.road_length(city_dict, chromosome)
 
+            # Create a new Individual with the chromosome and fitness
             new_individual = Individual(chromosome, fitness)
 
+            # Add the new individual to the population
             self._population.append(new_individual)
 
     def evolve_for_one_generation(self):
@@ -75,54 +80,52 @@ class GASolver:
                 mutation_rate
         """
 
+        # Get the default road (sequence of cities)
         possible_cities = cities.default_road(city_dict)
 
-        # Sort the population
+        # Sort the population in descending order based on fitness
         self._population.sort(key=lambda x: x.fitness, reverse=True)
 
-        # Selection
-        self._population = self._population[:int(len(self._population)*self._selection_rate)]
+        # Selection: Keep only the top x% of the population
+        self._population = self._population[:int(len(self._population) * self._selection_rate)]
         
-        nombres = range(0, len(self._population) - 1)  # Génère les nombres de 1 à 5
-
+        # Generate all possible combinations of parent indices for reproduction
+        nombres = range(0, len(self._population) - 1)
         combinaisons = list(itertools.combinations(nombres, 2))
 
+        # Reproduce until the population size reaches the desired size
         while len(self._population) < self._pop_size:
         
-            # Reproduction
+            # Select a random pair of parents from the combinations
             index = random.choice(combinaisons)
-
             combinaisons.remove(index)
             
             parent1 = self._population[index[0]]
             parent2 = self._population[index[1]]
 
+            # Perform crossover at a random point
             x_point = random.randint(1, len(parent1.chromosome) - 1) if len(parent1.chromosome) > 1 else 1
 
             # Step 1: Get cities in the first segment of parent1
             segment1 = parent1.chromosome[:x_point]
 
-            # Step 2: Get cities from parent2 in order, but without the cities already in segment1
+            # Step 2: Get cities from parent2 in order, excluding those already in segment1
             segment2 = [city for city in parent2.chromosome if city not in segment1]
 
             # Step 3: Merge the two parts to create a new chromosome
             new_chrom = segment1 + segment2
 
+            # Mutation: Swap two cities in the chromosome with a certain probability
             number = random.random()
-
-            # Mutation
             if number < self._mutation_rate:
-
-                index1 , index2 = np.random.randint(0, len(new_chrom), 2)
+                index1, index2 = np.random.randint(0, len(new_chrom), 2)
                 new_chrom[index1], new_chrom[index2] = new_chrom[index2], new_chrom[index1]
 
-            
+            # Calculate the fitness of the new individual
             new_fitness = - cities.road_length(city_dict, new_chrom)
 
+            # Create a new individual and add it to the population
             new_individual = Individual(new_chrom, new_fitness)
-
-            print(len(new_chrom))
-
             self._population.append(new_individual)
 
     def show_generation_summary(self):
