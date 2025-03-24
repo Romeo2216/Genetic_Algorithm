@@ -55,3 +55,4 @@ For detailed examples, refer to the implementations in the `genetic_part3` folde
 
 ## Conclusion
 This project demonstrates the versatility of Genetic Algorithms in solving diverse optimization problems. By following the modular approach in `genetic_part3`, you can adapt the GA solver to tackle new challenges efficiently.
+ 
